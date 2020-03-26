@@ -31,8 +31,9 @@ const shelfUICtrl = (() => {
                     <div class="rack" id="${el.shelfId}">
                     <h1 class="rack_number">${el.shelfOrder}</h1>
                         ${el.products.map(product => (
-                            `<div class="product" id="${product.productId}" draggable="true">
-                            <img src="${product.productUrl}" alt="">
+                            `
+                            <div data-order="${product.productOrder}" class="product" id="${product.productId}" draggable="true">
+                                <img src="${product.productUrl}" alt="">
                             </div>
                             `
                         ))}
@@ -44,19 +45,20 @@ const shelfUICtrl = (() => {
         getDOMstrings: () => {
             return DOMstrings
         },
-        getMousePosition: (rack, y) => {
-            const draggableElements =  [...rack.querySelectorAll('.product:not(.draggin)')];
+        getMousePosition: (rack, x) => {
+            const allProducts = [...rack.querySelectorAll('.product:not(.draggin)')];
 
-            return draggableElements.reduce((closest, child) => {
+            return allProducts.reduce((closest, child) => {
                 const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-                if(offset < 0 && offset > closest.offset) {
-                    return {offset: offset, element: child}
+                const offset = x - box.left - box.width / 2;
+                if(offset < 0  && offset > closest.offset) {
+                    return {
+                        offset: offset,
+                        element: child
+                    }
                 } else {
                     return closest
                 }
-               
-                
             }, {offset: Number.NEGATIVE_INFINITY}).element
         }
    }
@@ -89,19 +91,18 @@ const shelfControler = (async (shelfModal, shelfUI) => {
    })
 
    racks.forEach(rack => {
-        rack.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            const afterElement = shelfUI.getMousePosition(rack, e.clientY);
-            const draggable = document.querySelector('.draggin');
-            if(afterElement == null) {
-                rack.appendChild(draggable)
-            } else {
-                rack.insertBefore(draggable, afterElement)
-            }
+       rack.addEventListener('dragover', (e) => {
+           e.preventDefault();
+           const draggable = document.querySelector('.draggin');
+           const afterElement = shelfUI.getMousePosition(rack, e.clientX);
+           if(afterElement == null) {
+                rack.appendChild(draggable);
+           } else {
+               rack.insertBefore(draggable, afterElement)
+           }
+           console.log(afterElement)
            
-           
-           
-        })
+       })
    })
 
   
